@@ -1,0 +1,60 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Payment History{% endblock %}
+
+{% block content %}
+<h2 class="page-title">My Payment History</h2>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Date</th>
+                    <th>Month</th>
+                    <th>Amount</th>
+                    <th>Mode</th>
+                    <th>Status</th>
+                    <th>Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td class="ps-4">{{ p.payment_date.strftime('%d-%b-%Y') }}</td>
+                    <td>{{ p.month_year }}</td>
+                    <td class="fw-bold">₹{{ p.amount }}</td>
+                    <td>
+                        {% if p.mode == 'Online' %}
+                            <span class="badge bg-info text-dark">Online</span>
+                            <div class="small text-muted" style="font-size: 10px;">{{ p.transaction_id }}</div>
+                        {% else %}
+                            <span class="badge bg-secondary">Cash</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status == 'Approved' %}
+                            <span class="badge bg-success">Paid</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status == 'Approved' %}
+                            <a href="{{ url_for('download_receipt', payment_id=p.id) }}" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-download me-1"></i> Receipt
+                            </a>
+                        {% else %}
+                            <button class="btn btn-sm btn-light text-muted" disabled>Waiting...</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No payment history found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Raise Complaint{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Premium Background */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    /* Wide Card */
+    .theme-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Left Side (Form) */
+    .form-section {
+        padding: 3rem;
+    }
+
+    /* Right Side (Visual/Info) */
+    .info-section {
+        background: #f8fafc;
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-left: 1px solid #e2e8f0;
+    }
+
+    /* Support Icon Animation */
+    .support-icon-circle {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #ef4444;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
+        margin-bottom: 2rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        background-color: #fff;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #cbd5e1;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+
+    .btn-submit {
+        background: #10b981;
+        color: white;
+        padding: 14px;
+        font-weight: 700;
+        border-radius: 12px;
+        border: none;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    .btn-submit:hover {
+        background: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px #cbd5e1;
+    }
+
+    /* Issue Type Cards (Radio Buttons Replacement) */
+    .issue-option {
+        display: none;
+    }
+    .issue-label {
+        display: block;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        background: #fff;
+    }
+    .issue-label:hover {
+        background: #fef2f2;
+        border-color: #fca5a5;
+    }
+    .issue-option:checked + .issue-label {
+        background: #fef2f2;
+        border-color: #cbd5e1;
+        color: #cbd5e1;
+        font-weight: 700;
+        box-shadow: 0 4px 10px #cbd5e1;
+    }
+    .issue-label i {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Report an Issue</h3>
+            <p class="text-muted small mb-0">Facing a problem? Let us know, we'll fix it.</p>
+        </div>
+        <a href="{{ url_for('renter_dashboard') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-arrow-left me-2"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12">
+            <div class="theme-card animate-fade-up">
+                
+                <form method="POST">
+                    <div class="row g-0">
+                        
+                        <div class="col-lg-7 form-section">
+                            
+                            <h5 class="fw-bold text-dark mb-4"><i class="fas fa-tools text-danger me-2"></i>Select Issue Category</h5>
+                            
+                            <div class="row g-3 mb-4">
+                                <div class="col-4">
+                                    <input type="radio" name="issue_type" id="type_water" value="Water Problem" class="issue-option" required>
+                                    <label for="type_water" class="issue-label">
+                                        <i class="fas fa-faucet text-primary"></i>
+                                        Water
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" name="issue_type" id="type_electric" value="Electricity Issue" class="issue-option">
+                                    <label for="type_electric" class="issue-label">
+                                        <i class="fas fa-bolt text-warning"></i>
+                                        Electric
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" name="issue_type" id="type_other" value="Other Issue" class="issue-option">
+                                    <label for="type_other" class="issue-label">
+                                        <i class="fas fa-wrench text-secondary"></i>
+                                        Other
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Describe the problem</label>
+                                <textarea name="message" class="form-control" rows="5" placeholder="Please describe the issue in detail (e.g., Fan not working in Room 101...)" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-submit w-100 shadow-sm">
+                                <i class="fas fa-paper-plane me-2"></i> Submit Complaint
+                            </button>
+
+                        </div>
+
+                        <div class="col-lg-5 info-section">
+                            
+                            <div class="text-center">
+                                <div class="d-inline-flex support-icon-circle animate__animated animate__pulse animate__infinite">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                
+                                <h5 class="fw-bold text-dark mb-2">Need Immediate Help?</h5>
+                                <p class="text-muted small mb-4">For urgent emergencies (like fire or major leakage), please call directly.</p>
+
+                                <div class="bg-white p-3 rounded-3 shadow-sm border mb-4 d-inline-block w-100">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                            <i class="fas fa-phone-alt"></i>
+                                        </div>
+                                        <div class="text-start">
+                                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Caretaker / Owner</small>
+                                            <span class="fw-bold text-dark h5 mb-0">+91 9471271839</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning border-0 small text-start shadow-sm">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <strong>Note:</strong> Standard complaints are usually resolved within 24-48 hours.
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

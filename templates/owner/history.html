@@ -1,0 +1,98 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Past Renters History{% endblock %}
+
+{% block content %}
+
+<style>
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("{{ url_for('static', filename='images/bg.png') }}");
+        min-height: 100vh;
+    }
+    .theme-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .table thead th {
+        background-color: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        padding: 1rem 1.5rem;
+    }
+    .table tbody td { padding: 1rem 1.5rem; vertical-align: middle; }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Past Renters History</h3>
+            <p class="text-muted small mb-0">Records of renters who have vacated the property.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="theme-card animate-fade-up">
+                
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Renter Name</th>
+                                <th>Room Stayed</th>
+                                <th>Duration</th>
+                                <th>Timeline</th>
+                                <th class="text-end pe-4">Lifetime Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in history %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user-clock"></i>
+                                        </div>
+                                        <div class="fw-bold text-dark">{{ h.name }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">Room {{ h.room_no }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ h.months }} Months</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column small">
+                                        <span class="text-success"><i class="fas fa-sign-in-alt me-2"></i>{{ h.joining.strftime('%d %b, %Y') }}</span>
+                                        <span class="text-danger"><i class="fas fa-sign-out-alt me-2"></i>{{ h.vacate.strftime('%d %b, %Y') }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <h5 class="fw-bold text-primary mb-0">₹{{ h.total_paid }}</h5>
+                                    <small class="text-muted">Total Collected</small>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-history fa-2x mb-3 opacity-25"></i><br>
+                                    No history records found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

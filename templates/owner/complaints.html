@@ -1,0 +1,185 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Manage Complaints{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Premium Background */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+
+    /* Complaint Card Design */
+    .complaint-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+    .complaint-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
+
+    /* Open Ticket Style */
+    .status-open {
+        border-left: 5px solid #ef4444; /* Red Border */
+    }
+    .status-open .status-badge {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+    }
+
+    /* Resolved Ticket Style */
+    .status-resolved {
+        border-left: 5px solid #10b981; /* Green Border */
+        opacity: 0.8;
+        background: #f8fafc;
+    }
+    .status-resolved .status-badge {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .room-badge {
+        background: #eff6ff;
+        color: #2563eb;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+    }
+
+    .btn-resolve {
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        width: 100%;
+    }
+    .btn-resolve:hover {
+        background: #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+
+    <div class="row align-items-center mb-4 pt-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold text-dark mb-1">Help Desk & Complaints</h3>
+            <p class="text-muted small mb-0">Manage and track issues raised by renters.</p>
+        </div>
+        <div class="col-md-6 mt-3 mt-md-0">
+            <div class="d-flex gap-3 justify-content-md-end">
+                
+                <div class="stat-card py-2 px-3">
+                    <div class="me-3">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Pending</small>
+                        <h4 class="fw-bold text-danger mb-0">{{ complaints | selectattr("status", "equalto", "Open") | list | length }}</h4>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card py-2 px-3">
+                    <div class="me-3">
+                        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Total</small>
+                        <h4 class="fw-bold text-dark mb-0">{{ complaints | length }}</h4>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for c in complaints %}
+        <div class="col-lg-4 col-md-6 animate-fade-up">
+            <div class="complaint-card h-100 p-4 d-flex flex-column {% if c.status == 'Open' %}status-open{% else %}status-resolved{% endif %}">
+                
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="room-badge me-2">Room {{ c.renter.room_no }}</div>
+                        <span class="small fw-bold text-dark">{{ c.renter.name }}</span>
+                    </div>
+                    <small class="text-muted" style="font-size: 0.75rem;">
+                        {{ c.created_at.strftime('%d %b') }}
+                    </small>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-2">
+                    {% if 'Water' in c.issue_type %}<i class="fas fa-faucet text-primary me-2"></i>
+                    {% elif 'Electric' in c.issue_type %}<i class="fas fa-bolt text-warning me-2"></i>
+                    {% elif 'Furniture' in c.issue_type %}<i class="fas fa-couch text-success me-2"></i>
+                    {% else %}<i class="fas fa-wrench text-secondary me-2"></i>
+                    {% endif %}
+                    {{ c.issue_type }}
+                </h5>
+
+                <p class="text-muted small mb-4 flex-grow-1" style="line-height: 1.6;">
+                    "{{ c.message }}"
+                </p>
+
+                <div class="mt-auto pt-3 border-top border-light">
+                    {% if c.status == 'Open' %}
+                        <div class="d-grid">
+                            <a href="{{ url_for('resolve_complaint', id=c.id) }}" class="btn btn-resolve" onclick="return confirm('Mark this issue as Resolved?')">
+                                <i class="fas fa-check-circle me-2"></i> Mark Resolved
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center text-success fw-bold py-2 bg-success bg-opacity-10 rounded-3">
+                            <i class="fas fa-check-double me-2"></i> Issue Solved
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="py-5 opacity-50">
+                <i class="fas fa-smile-beam fa-4x mb-3 text-success"></i>
+                <h4 class="text-muted fw-bold">All Good!</h4>
+                <p class="text-muted">No complaints found. Your renters are happy.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}

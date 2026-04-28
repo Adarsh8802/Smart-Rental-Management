@@ -1,0 +1,208 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Verify Payments{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Background Image with Whitish Overlay */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    .theme-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        padding: 0;
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Approve Button */
+    .btn-approve {
+        background-color: #10b981;
+        color: white;
+        border-radius: 50px;
+        padding: 8px 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: none;
+    }
+    .btn-approve:hover {
+        background-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    /* View Proof Button */
+    .btn-view {
+        background-color: #e0f2fe;
+        color: #0284c7;
+        border-radius: 50px;
+        padding: 6px 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid #bae6fd;
+        transition: all 0.2s;
+    }
+    .btn-view:hover {
+        background-color: #0284c7;
+        color: white;
+    }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Online Payment Requests</h3>
+            <p class="text-muted small mb-0">Verify screenshots & UTR before approving.</p>
+        </div>
+        <a href="{{ url_for('owner_dashboard') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-arrow-left me-2"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="theme-card animate-fade-up">
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Renter Details</th>
+                                <th>Total Amount</th>
+                                <th>Breakdown</th>
+                                <th>Proof & UTR</th>
+                                <th>Month</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in payments %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ p.renter.name }}</div>
+                                            <div class="small text-muted">Room: <span class="fw-bold text-dark">{{ p.renter.room_no }}</span></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <h5 class="fw-bold text-success mb-0">₹{{ p.amount }}</h5>
+                                </td>
+
+                                <td>
+                                    {% if p.elec_amount > 0 %}
+                                    <div class="small bg-light p-2 rounded border" style="width: fit-content;">
+                                        <div class="d-flex justify-content-between gap-3">
+                                            <span class="text-muted">Rent:</span> 
+                                            <span class="fw-bold text-dark">₹{{ p.amount - p.elec_amount }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between gap-3">
+                                            <span class="text-muted">Elec:</span> 
+                                            <span class="fw-bold text-primary">₹{{ p.elec_amount }}</span>
+                                        </div>
+                                        <div class="border-top mt-1 pt-1 text-xs text-muted">
+                                            {{ p.curr_reading - p.prev_reading }} Units Used
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-2 rounded-pill">Rent Only</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="mb-2">
+                                        <span class="font-monospace bg-light border px-2 py-1 rounded small text-dark">
+                                            <i class="fas fa-hashtag text-muted me-1"></i>{{ p.transaction_id }}
+                                        </span>
+                                    </div>
+                                    
+                                    {% if p.screenshot %}
+                                        <button type="button" class="btn btn-view" data-bs-toggle="modal" data-bs-target="#proofModal{{ p.id }}">
+                                            <i class="fas fa-image me-1"></i> View Proof
+                                        </button>
+
+                                        <div class="modal fade" id="proofModal{{ p.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg">
+                                                    <div class="modal-header border-0">
+                                                        <h6 class="modal-title fw-bold">Payment Screenshot</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body text-center p-0 bg-light">
+                                                        <img src="{{ url_for('static', filename='uploads/' + p.screenshot) }}" class="img-fluid" style="max-height: 500px;">
+                                                    </div>
+                                                    <div class="modal-footer border-0 justify-content-center">
+                                                        <span class="text-muted small">UTR: {{ p.transaction_id }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted small fst-italic">No Screenshot</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="fw-bold text-dark">{{ p.month_year }}</span>
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('approve_payment', id=p.id) }}" class="btn btn-approve shadow-sm" onclick="return confirm('Verify Amount: ₹{{ p.amount }}\nApprove this payment?')">
+                                        <i class="fas fa-check me-1"></i> Approve
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="py-4">
+                                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                            <i class="fas fa-check-double text-success fs-3 opacity-50"></i>
+                                        </div>
+                                        <h6 class="text-dark fw-bold mb-1">All Caught Up!</h6>
+                                        <p class="text-muted small mb-0">No pending requests at the moment.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

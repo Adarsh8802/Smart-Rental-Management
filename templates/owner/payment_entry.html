@@ -1,0 +1,272 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Record Payment{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Background Setup */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    /* Wide Card Design */
+    .theme-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+        overflow: hidden; 
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Left Side (Inputs) */
+    .input-section {
+        padding: 2.5rem;
+    }
+
+    /* Right Side (Summary) */
+    .summary-section {
+        background: #f8fafc;
+        padding: 2.5rem;
+        border-left: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Electricity Box */
+    .elec-box {
+        background-color: #f0f9ff;
+        border: 1px dashed #0ea5e9;
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+
+    /* Total Display (Green Box) */
+    .total-display {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-confirm {
+        background: #10b981;
+        color: white;
+        padding: 15px;
+        font-weight: 700;
+        border-radius: 12px;
+        border: none;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+    }
+    .btn-confirm:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Record Rent Payment</h3>
+            <p class="text-muted small mb-0">Calculate electricity & mark rent as paid.</p>
+        </div>
+        <a href="{{ url_for('owner_online_requests') }}" class="btn btn-warning shadow-sm fw-bold rounded-pill px-3">
+            <i class="fas fa-bell me-2"></i> Online Requests
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-11 col-lg-12">
+            <div class="theme-card animate-fade-up">
+
+                <form method="POST">
+                    <div class="row g-0">
+                        
+                        <div class="col-lg-7 input-section">
+                            <h5 class="fw-bold text-dark mb-4"><i class="fas fa-edit text-primary me-2"></i>Payment Details</h5>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Select Renter</label>
+                                <select name="renter_id" id="renterSelect" class="form-select form-select-lg" onchange="updateBaseRent()" required>
+                                    <option value="" selected disabled>Choose a renter...</option>
+                                    {% for r in renters %}
+                                    <option value="{{ r.id }}" data-rent="{{ r.monthly_rent }}" data-balance="{{ r.current_balance }}">
+                                        {{ r.name }} (Room: {{ r.room_no }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <div id="balanceBadge" class="mt-2"></div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">For Month</label>
+                                    <input type="month" name="month_year" class="form-control" value="{{ date.today().strftime('%Y-%m') }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Payment Date</label>
+                                    <input type="date" name="payment_date" class="form-control" value="{{ date.today() }}" required>
+                                </div>
+                            </div>
+
+                            <div class="elec-box">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="fw-bold text-primary"><i class="fas fa-bolt me-2"></i>Electricity Meter</span>
+                                    <span class="badge bg-white text-primary border shadow-sm">Rate: ₹7/Unit</span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <label class="small text-muted fw-bold">Prev Reading</label>
+                                        <input type="number" name="prev_reading" id="prev" class="form-control bg-white" placeholder="0" oninput="calculateTotal()">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="small text-muted fw-bold">Curr Reading</label>
+                                        <input type="number" name="curr_reading" id="curr" class="form-control bg-white" placeholder="0" oninput="calculateTotal()">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="small text-muted fw-bold">Rate</label>
+                                        <input type="number" name="elec_rate" id="rate" class="form-control bg-white" value="7" oninput="calculateTotal()">
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-end small fw-bold text-dark">
+                                    Used: <span id="units_display" class="text-primary">0</span> Units = ₹<span id="elec_cost_display">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5 summary-section">
+                            
+                            <div class="total-display">
+                                <p class="small text-white-50 text-uppercase fw-bold mb-2">Total Amount Received</p>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <span class="display-3 fw-bold me-1">₹</span>
+                                    <input type="number" name="amount" id="totalAmount" 
+                                           class="form-control border-0 bg-transparent fw-bold display-3 text-white text-center p-0" 
+                                           style="max-width: 250px; box-shadow: none;" oninput="checkDifference()" required>
+                                </div>
+                                <p class="text-white-50 mb-0 mt-2 small">This amount will be marked as PAID</p>
+                            </div>
+
+                            <div class="mb-4 px-3">
+                                <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                                    <span class="text-muted">Base Rent</span>
+                                    <span class="fw-bold text-dark">₹<span id="base_rent_display">0</span></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                                    <span class="text-muted">Electricity Charges</span>
+                                    <span class="fw-bold text-primary">+ ₹<span id="elec_breakdown_display">0</span></span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted fw-bold">Total Bill</span>
+                                    <span class="fw-bold text-dark">₹<span id="calculated_bill_display">0</span></span>
+                                </div>
+
+                                <div id="differenceMsg" class="mt-3 text-center small fw-bold"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-confirm w-100 shadow" onclick="return confirm('Confirm payment entry?');">
+                                <i class="fas fa-check-circle me-2"></i> Confirm & Mark Paid
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let baseRent = 0;
+    let prevBalance = 0;
+    let calculatedBill = 0;
+
+    function updateBaseRent() {
+        const select = document.getElementById('renterSelect');
+        const option = select.options[select.selectedIndex];
+        
+        // Retrieve Data
+        baseRent = parseInt(option.getAttribute('data-rent')) || 0;
+        prevBalance = parseInt(option.getAttribute('data-balance')) || 0;
+        
+        // Update UI
+        document.getElementById('base_rent_display').innerText = baseRent;
+        
+        // Show Previous Balance Badge
+        const badgeDiv = document.getElementById('balanceBadge');
+        if(prevBalance > 0) {
+            badgeDiv.innerHTML = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Previous Due: ₹${prevBalance}</span>`;
+        } else if(prevBalance < 0) {
+            badgeDiv.innerHTML = `<span class="badge bg-info bg-opacity-10 text-info border border-info text-dark">Advance: ₹${Math.abs(prevBalance)}</span>`;
+        } else {
+            badgeDiv.innerHTML = `<span class="badge bg-success bg-opacity-10 text-success border border-success">No Dues</span>`;
+        }
+
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        const prev = parseInt(document.getElementById('prev').value) || 0;
+        const curr = parseInt(document.getElementById('curr').value) || 0;
+        const rate = parseInt(document.getElementById('rate').value) || 0;
+
+        let units = Math.max(0, curr - prev);
+        let elecCost = units * rate;
+        
+        // Update Small Displays
+        document.getElementById('units_display').innerText = units;
+        document.getElementById('elec_cost_display').innerText = elecCost;
+        document.getElementById('elec_breakdown_display').innerText = elecCost;
+
+        // Calculate Actual Bill (Rent + Elec)
+        calculatedBill = baseRent + elecCost;
+        document.getElementById('calculated_bill_display').innerText = calculatedBill;
+
+        // Set Input to Calculated Bill (Owner can change later)
+        // Note: Previous balance is NOT added to 'Paid Amount' automatically,
+        // it is tracked separately. Receipt is only for current payment.
+        document.getElementById('totalAmount').value = calculatedBill;
+        
+        checkDifference();
+    }
+
+    function checkDifference() {
+        const enteredAmount = parseInt(document.getElementById('totalAmount').value) || 0;
+        const diff = calculatedBill - enteredAmount;
+        const msgDiv = document.getElementById('differenceMsg');
+
+        if(diff > 0) {
+            msgDiv.innerHTML = `<span class="text-danger">Short Amount: ₹${diff} will be added to DUES.</span>`;
+        } else if(diff < 0) {
+            msgDiv.innerHTML = `<span class="text-success">Excess Amount: ₹${Math.abs(diff)} will be added as ADVANCE.</span>`;
+        } else {
+            msgDiv.innerHTML = `<span class="text-muted">Exact Payment. No Due/Advance.</span>`;
+        }
+    }
+</script>
+
+{% endblock %}

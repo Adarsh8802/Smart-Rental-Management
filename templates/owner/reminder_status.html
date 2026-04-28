@@ -1,0 +1,224 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Reminder Settings{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Background Setup */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    /* Wide Card */
+    .theme-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Left Side (Status Control) */
+    .control-section {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100%;
+    }
+
+    /* Right Side (Timeline Info) */
+    .info-section {
+        background: #f8fafc;
+        padding: 3rem;
+        border-left: 1px solid #e2e8f0;
+    }
+
+    /* Status Circle Animation */
+    .status-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .status-active {
+        background: #dcfce7;
+        color: #16a34a;
+        box-shadow: 0 0 0 15px rgba(22, 163, 74, 0.1);
+        animation: pulse-green 2s infinite;
+    }
+
+    .status-inactive {
+        background: #f1f5f9;
+        color: #64748b;
+        box-shadow: 0 0 0 15px rgba(100, 116, 139, 0.1);
+    }
+
+    @keyframes pulse-green {
+        0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(22, 163, 74, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+    }
+
+    /* Timeline Items */
+    .timeline-item {
+        position: relative;
+        padding-left: 2.5rem;
+        margin-bottom: 2rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: -2rem;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    .timeline-item:last-child::before { display: none; }
+    
+    .timeline-icon {
+        position: absolute;
+        left: -19px;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    .btn-toggle {
+        padding: 12px 40px;
+        border-radius: 50px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+    }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Automated Reminders</h3>
+            <p class="text-muted small mb-0">Manage automatic email notifications for renters.</p>
+        </div>
+        <a href="{{ url_for('owner_dashboard') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-arrow-left me-2"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12">
+            <div class="theme-card animate-fade-up">
+                
+                <div class="row g-0">
+                    
+                    <div class="col-lg-5">
+                        <div class="control-section">
+                            
+                            {% if is_active %}
+                                <div class="status-circle status-active">
+                                    <i class="fas fa-paper-plane"></i>
+                                </div>
+                                <h4 class="fw-bold text-success mb-2">System Active</h4>
+                                <p class="text-muted small mb-4">Emails are being sent automatically daily at 10 AM.</p>
+                                
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="disable">
+                                    <button type="submit" class="btn btn-outline-danger btn-toggle shadow-sm">
+                                        <i class="fas fa-power-off me-2"></i> Turn Off
+                                    </button>
+                                </form>
+                            {% else %}
+                                <div class="status-circle status-inactive">
+                                    <i class="fas fa-pause"></i>
+                                </div>
+                                <h4 class="fw-bold text-secondary mb-2">System Paused</h4>
+                                <p class="text-muted small mb-4">No reminders are currently being sent.</p>
+                                
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="enable">
+                                    <button type="submit" class="btn btn-success btn-toggle shadow">
+                                        <i class="fas fa-play me-2"></i> Activate Now
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7 info-section">
+                        <h5 class="fw-bold text-dark mb-4"><i class="fas fa-stream text-primary me-2"></i>How it works</h5>
+                        
+                        <div class="ps-3">
+                            
+                            <div class="timeline-item">
+                                <div class="timeline-icon text-primary border-primary bg-primary bg-opacity-10">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">3 Days Before Due Date</h6>
+                                <p class="text-muted small mb-0">
+                                    A gentle reminder email is sent to the renter about the upcoming rent payment.
+                                </p>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-icon text-warning border-warning bg-warning bg-opacity-10">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">On Due Date (Today)</h6>
+                                <p class="text-muted small mb-0">
+                                    An urgent reminder is sent at 10:00 AM requesting payment today via the portal.
+                                </p>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-icon text-danger border-danger bg-danger bg-opacity-10">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark">5 Days Overdue</h6>
+                                <p class="text-muted small mb-0">
+                                    If rent is still unpaid, a strict "Overdue Warning" email is sent.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 p-3 bg-white rounded-3 border border-light shadow-sm d-flex align-items-center">
+                            <i class="fas fa-server text-muted me-3 fs-4"></i>
+                            <div>
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Next Scheduled Run</small>
+                                <span class="fw-bold text-dark">{{ upcoming }}</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

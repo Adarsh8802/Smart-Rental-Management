@@ -1,0 +1,318 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Premium Background */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        border: none;
+        border-radius: 20px;
+        color: white;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+        height: 100%;
+    }
+    .stat-card:hover { transform: translateY(-5px); }
+
+    .bg-gradient-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+
+    /* Decoration Circles */
+    .decoration-circle {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        top: -30px;
+        right: -30px;
+    }
+
+    /* Main Section Card */
+    .theme-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Profile Avatar (Updated Logic) */
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e2e8f0;
+    }
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        border-radius: 16px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 1px solid #e2e8f0;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #334155;
+        text-decoration: none;
+    }
+    .btn-action:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        color: #2563eb;
+    }
+</style>
+
+{% if notices %}
+<div class="modal fade" id="noticeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header border-0 flex-column align-items-center justify-content-center pt-4 pb-0">
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="fas fa-bullhorn fs-2 animate__animated animate__tada animate__infinite"></i>
+                </div>
+                <h4 class="modal-title fw-bold text-dark text-center">New Announcement</h4>
+            </div>
+            <div class="modal-body p-4 px-md-5">
+                <div class="vstack gap-3">
+                    {% for n in notices %}
+                    <div class="p-3 rounded-3 border-start border-4 border-warning bg-light shadow-sm">
+                        <h6 class="fw-bold text-dark mb-1">{{ n.message }}</h6>
+                        <small class="text-muted"><i class="far fa-clock me-1"></i> Posted on: {{ n.created_at.strftime('%d %b, %Y') }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-dark px-5 rounded-pill shadow-sm" data-bs-dismiss="modal">I Understood</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+<div class="container-fluid px-4 pb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Welcome, {{ renter.name.split()[0] }}!</h2>
+            <p class="text-muted small mb-0">Here is your rental overview.</p>
+        </div>
+        <div class="d-none d-md-block">
+            <span class="badge bg-white text-dark border px-3 py-2 shadow-sm rounded-pill">
+                <i class="fas fa-calendar-alt me-2 text-primary"></i> {{ date.today().strftime('%d %B, %Y') }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        
+        <div class="col-xl-4 col-md-6">
+            {% if status == 'Paid' %}
+            <div class="stat-card bg-gradient-success">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Status</p>
+                    <h2 class="fw-bold mb-0"><i class="fas fa-check-circle me-2"></i>Paid</h2>
+                    <p class="small text-white-50 mt-2 mb-0">For {{ date.today().strftime('%B %Y') }}</p>
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25"><i class="fas fa-smile-beam fa-3x"></i></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="stat-card bg-gradient-warning">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Status</p>
+                    <h2 class="fw-bold mb-0"><i class="fas fa-clock me-2"></i>Pending</h2>
+                    <p class="small text-white-50 mt-2 mb-0">Due Date: {{ due_date }}</p>
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25"><i class="fas fa-exclamation-triangle fa-3x"></i></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="stat-card bg-gradient-info">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Monthly Rent</p>
+                    <h2 class="fw-bold mb-0">₹{{ renter.monthly_rent }}</h2>
+                    <p class="small text-white-50 mt-2 mb-0">Flat/Room Rent</p>
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25"><i class="fas fa-tag fa-3x"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-12">
+            <div class="stat-card" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Active Complaints</p>
+                    <h2 class="fw-bold mb-0">{{ open_issues }}</h2>
+                    <p class="small text-white-50 mt-2 mb-0">Issues being resolved</p>
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25"><i class="fas fa-tools fa-3x"></i></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3">
+        
+        <div class="col-xl-8">
+            <div class="theme-card h-100">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h6 class="fw-bold text-dark mb-0"><i class="fas fa-receipt text-primary me-2"></i>Recent Transactions</h6>
+                    <a href="{{ url_for('renter_history') }}" class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3 border" style="font-size: 0.75rem;">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 py-2 text-muted small text-uppercase">Month</th>
+                                <th class="py-2 text-muted small text-uppercase">Date</th>
+                                <th class="py-2 text-muted small text-uppercase">Amount</th>
+                                <th class="text-end pe-3 py-2 text-muted small text-uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_payments %}
+                            <tr>
+                                <td class="ps-3 fw-bold text-dark small">{{ p.month_year }}</td>
+                                <td class="text-muted small">{{ p.payment_date.strftime('%d %b') }}</td>
+                                <td>
+                                    <span class="fw-bold text-success small">₹{{ p.amount }}</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    {% if p.status == 'Approved' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2" style="font-size: 0.7rem;">Paid</span>
+                                    {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2" style="font-size: 0.7rem;">Processing</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted small">No history found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            
+            <div class="theme-card mb-3 text-center p-3" style="background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);">
+                <div class="d-flex justify-content-center">
+                    <div class="profile-avatar mb-2">
+                        {% if renter.photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + renter.photo) }}" alt="Profile">
+                        {% else %}
+                        <div class="d-flex align-items-center justify-content-center w-100 h-100 bg-light text-secondary fs-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <h5 class="fw-bold text-dark mb-0">{{ renter.name }}</h5>
+                <p class="text-muted small mb-2" style="font-size: 0.85rem;">{{ renter.email }}</p>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2 py-1 rounded-pill mb-3" style="font-size: 0.75rem;">
+                    Room No: {{ renter.room_no }}
+                </span>
+
+                <div class="bg-white rounded-3 border p-2 text-start shadow-sm">
+                    <div class="d-flex justify-content-between mb-1 border-bottom pb-1">
+                        <span class="text-muted small" style="font-size: 0.75rem;">Mobile</span>
+                        <span class="fw-bold text-dark small" style="font-size: 0.75rem;">+91 {{ renter.mobile }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 border-bottom pb-1">
+                        <span class="text-muted small" style="font-size: 0.75rem;">Joined On</span>
+                        <span class="fw-bold text-dark small" style="font-size: 0.75rem;">{{ renter.joining_date.strftime('%d %b, %Y') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 border-bottom pb-1">
+                        <span class="text-muted small" style="font-size: 0.75rem;">Total Stay</span>
+                        <span class="fw-bold text-success small" style="font-size: 0.75rem;">{{ duration }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small" style="font-size: 0.75rem;">Deposit</span>
+                        <span class="fw-bold text-primary small" style="font-size: 0.75rem;">₹{{ renter.security_deposit }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('renter_pay_online') }}" class="btn-action p-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-2">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark small">Pay Online</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Instant UPI</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted small"></i>
+                </a>
+
+                <a href="{{ url_for('raise_complaint') }}" class="btn-action p-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-2">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark small">Report Issue</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Get help</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted small"></i>
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        var noticeModalElement = document.getElementById('noticeModal');
+        if (noticeModalElement) {
+            var myModal = new bootstrap.Modal(noticeModalElement);
+            myModal.show();
+        }
+    });
+</script>
+
+{% endblock %}

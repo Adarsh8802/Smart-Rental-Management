@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #d97706; text-transform: uppercase; }
+        .title { font-size: 20px; font-weight: bold; margin-top: 10px; text-decoration: underline; }
+        .content { line-height: 1.6; font-size: 14px; }
+        .details-box { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; margin: 20px 0; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .label { font-weight: bold; width: 150px; display: inline-block; }
+        .rules li { margin-bottom: 8px; }
+        .footer { margin-top: 50px; display: flex; justify-content: space-between; }
+        .sign-box { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">Mundrawati Niketan</div>
+        <div>Sahjanand Colony 07, Muzaffarpur, Bihar</div>
+        <div class="title">RENTAL AGREEMENT / WELCOME LETTER</div>
+    </div>
+
+    <div class="content">
+        <p>This agreement is made on <strong>{{ date.strftime('%d %B, %Y') }}</strong> between <strong>Mundrawati Niketan</strong> (Owner) and <strong>{{ renter.name }}</strong> (Renter).</p>
+
+        <div class="details-box">
+            <div class="row"><span class="label">Renter Name:</span> {{ renter.name }}</div>
+            <div class="row"><span class="label">Mobile No:</span> {{ renter.mobile }}</div>
+            <div class="row"><span class="label">Room Allocated:</span> Room No. {{ renter.room_no }}</div>
+            <div class="row"><span class="label">Joining Date:</span> {{ renter.joining_date.strftime('%d %b, %Y') }}</div>
+            <div class="row"><span class="label">Monthly Rent:</span> ₹{{ renter.monthly_rent }}</div>
+            <div class="row"><span class="label">Security Deposit:</span> ₹{{ renter.security_deposit }}</div>
+            <div class="row"><span class="label">Rent Due Date:</span> {{ renter.rent_due_day }}th of every month</div>
+        </div>
+
+        <h3>Terms & Conditions (House Rules):</h3>
+        <ul class="rules">
+            <li>Rent must be paid on or before the due date to avoid late fees.</li>
+            <li>Electricity bill is calculated separately based on sub-meter reading (₹7/Unit).</li>
+            <li>One month notice is mandatory before vacating the room.</li>
+            <li>No loud music or disturbance to other renters is allowed.</li>
+            <li>Security deposit is refundable only after clearing all dues and checking room inventory.</li>
+            <li>Main gate locks at 11:00 PM.</li>
+        </ul>
+
+        <p>I, <strong>{{ renter.name }}</strong>, agree to all the terms and conditions mentioned above.</p>
+    </div>
+
+    <br><br><br>
+    <table style="width: 100%; margin-top: 50px;">
+        <tr>
+            <td align="left">
+                <div class="sign-box">Authorized Signature<br>(Owner)</div>
+            </td>
+            <td align="right">
+                <div class="sign-box">Renter Signature<br>({{ renter.name }})</div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

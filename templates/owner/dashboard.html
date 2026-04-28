@@ -1,0 +1,305 @@
+{% extends "dashboard_layout.html" %}
+{% block title %}Owner Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Premium Background */
+    .main-content {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("{{ url_for('static', filename='images/bg.png') }}");
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    /* Stat Cards with Gradients */
+    .stat-card {
+        border: none;
+        border-radius: 20px;
+        color: white;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+        height: 100%;
+    }
+    .stat-card:hover { transform: translateY(-5px); }
+    
+    .bg-gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .bg-gradient-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .bg-gradient-pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+
+    /* Decoration Circles */
+    .decoration-circle {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        top: -30px;
+        right: -30px;
+    }
+
+    /* Section Cards */
+    .theme-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Table Styling */
+    .table thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        padding: 1rem 1.5rem;
+    }
+    .table tbody td { padding: 1rem 1.5rem; vertical-align: middle; }
+
+    /* Action Buttons */
+    .btn-quick {
+        border-radius: 16px;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+        background: white;
+    }
+    .btn-quick:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+    }
+</style>
+
+<div class="container-fluid px-4 pb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Dashboard Overview</h2>
+            <p class="text-muted small mb-0">Welcome back! Here's what's happening today.</p>
+        </div>
+        <div class="d-none d-md-block">
+            <span class="badge bg-white text-dark border px-3 py-2 shadow-sm rounded-pill">
+                <i class="fas fa-calendar-alt me-2 text-primary"></i> {{ date.today().strftime('%d %B, %Y') }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-gradient-green">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Collected This Month</p>
+                    <h2 class="fw-bold mb-2">₹{{ collected }}</h2>
+                    
+                    <div class="d-flex align-items-center pt-2 mt-2 border-top border-white border-opacity-25">
+                        <div class="me-3" title="Rent Portion">
+                            <i class="fas fa-home opacity-75 me-1" style="font-size: 0.8rem;"></i>
+                            <span class="fw-bold small">₹{{ total_rent }}</span>
+                        </div>
+                        <div title="Electricity Portion">
+                            <i class="fas fa-bolt opacity-75 me-1" style="font-size: 0.8rem;"></i>
+                            <span class="fw-bold small">₹{{ total_elec }}</span>
+                        </div>
+                    </div>
+
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25">
+                        <i class="fas fa-wallet fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-gradient-orange">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Pending Rent</p>
+                    <h2 class="fw-bold mb-0">₹{{ pending }}</h2>
+                    <p class="small text-white-50 mt-2 mb-0">Excluding current bills</p>
+                    
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25">
+                        <i class="fas fa-exclamation-circle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-gradient-blue">
+                <div class="card-body p-4 position-relative z-1">
+                    <p class="text-white-50 text-uppercase small fw-bold mb-1">Occupancy</p>
+                    <h2 class="fw-bold mb-0">{{ occupied }} <span class="fs-6 fw-normal opacity-75">/ 7 Rooms</span></h2>
+                    <span class="badge bg-white bg-opacity-25 mt-3">{{ vacant }} Vacant</span>
+                    
+                    <div class="decoration-circle"></div>
+                    <div class="position-absolute bottom-0 end-0 p-3 opacity-25">
+                        <i class="fas fa-users fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="{{ url_for('owner_complaints') }}" class="text-decoration-none">
+                <div class="stat-card bg-gradient-pink">
+                    <div class="card-body p-4 position-relative z-1">
+                        <p class="text-white-50 text-uppercase small fw-bold mb-1">Active Complaints</p>
+                        <h2 class="fw-bold mb-0">{{ pending_issues }}</h2>
+                        <span class="small text-white-50 mt-2 d-block">Tap to view & resolve &rarr;</span>
+                        
+                        <div class="decoration-circle"></div>
+                        <div class="position-absolute bottom-0 end-0 p-3 opacity-25">
+                            <i class="fas fa-tools fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-xl-8">
+            <div class="theme-card h-100">
+                <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-history text-primary me-2"></i>Recent Transactions</h5>
+                    <a href="{{ url_for('transaction_history') }}" class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3 border">View All</a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Renter</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Mode</th>
+                                <th class="text-end pe-4">Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_payments %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ p.renter.name }}</div>
+                                    <span class="small text-muted">Room {{ p.renter.room_no }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-success">₹{{ p.amount }}</span>
+                                </td>
+                                <td class="text-muted small">
+                                    {{ p.payment_date.strftime('%d %b') }}
+                                </td>
+                                <td>
+                                    {% if p.mode == 'Online' %}
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill">Online</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill">Cash</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('download_receipt', payment_id=p.id) }}" class="btn btn-sm btn-light border shadow-sm text-danger">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    No recent transactions found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            
+            <div class="theme-card mb-4" style="background: #fffbeb; border-color: #fef3c7;">
+                <div class="p-3 border-bottom border-warning border-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-bullhorn text-warning me-2"></i>Notice Board</h5>
+                </div>
+                <div class="p-3">
+                    <form action="{{ url_for('add_notice') }}" method="POST" class="mb-3">
+                        <div class="input-group shadow-sm">
+                            <input type="text" name="message" class="form-control border-0" placeholder="Type a notice..." required>
+                            <button class="btn btn-warning text-dark fw-bold" type="submit"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+
+                    <div class="vstack gap-2" style="max-height: 200px; overflow-y: auto;">
+                        {% if notices %}
+                            {% for n in notices %}
+                            <div class="bg-white p-2 rounded border shadow-sm d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="small fw-bold text-dark">{{ n.message }}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">{{ n.created_at.strftime('%d %b, %I:%M %p') }}</div>
+                                </div>
+                                <a href="{{ url_for('delete_notice', id=n.id) }}" class="text-danger small ms-2"><i class="fas fa-trash"></i></a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small text-center my-2">No active notices.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="theme-card">
+                <div class="p-4 border-bottom">
+                    <h5 class="fw-bold text-dark mb-0">Quick Actions</h5>
+                </div>
+                <div class="p-3 d-grid gap-3">
+                    
+                    <a href="{{ url_for('add_renter') }}" class="btn-quick d-flex align-items-center text-decoration-none">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">Add New Renter</div>
+                            <div class="small text-muted">Onboard Renter</div>
+                        </div>
+                    </a>
+
+                    <a href="{{ url_for('payment_entry') }}" class="btn-quick d-flex align-items-center text-decoration-none">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">Record Payment</div>
+                            <div class="small text-muted">Rent + Elec Bill</div>
+                        </div>
+                    </a>
+
+                    <a href="{{ url_for('owner_online_requests') }}" class="btn-quick d-flex align-items-center text-decoration-none" style="background: #fffbeb; border-color: #fcd34d;">
+                        <div class="bg-warning text-dark rounded-circle p-3 me-3">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">Verify Online Pay</div>
+                            <div class="small text-muted">Check UPI Requests</div>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

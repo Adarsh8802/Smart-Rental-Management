@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundrawati Niketan - Smart Living</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. Background & Layout --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Hero Section with Background Image */
+        .hero-section {
+            background: url("{{ url_for('static', filename='images/bg.png') }}") no-repeat center center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Navbar Overlay */
+        .navbar-transparent {
+            padding: 1.5rem 3rem;
+            position: absolute; /* Desktop par content ke upar rahega */
+            top: 0;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* --- 2. Glass Card Center --- */
+        .glass-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin-top: 60px; /* Desktop Margin */
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            animation: fadeUp 1s ease-out;
+        }
+
+        /* Feature Boxes inside Card */
+        .feature-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .feature-box:hover {
+            transform: translateY(-5px);
+        }
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* --- 3. Professional Dark Footer --- */
+        .professional-footer {
+            background-color: #4b5571;
+            color: #94a3b8;
+            padding-top: 60px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 20;
+        }
+        .footer-heading {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        .footer-link {
+            color: #ffffff;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: block;
+            transition: color 0.3s;
+        }
+        .footer-link:hover {
+            color: #60a5fa;
+            padding-left: 5px;
+        }
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            margin-right: 10px;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+        .social-icon:hover {
+            background: #4f46e5;
+        }
+        .copyright-bar {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 50px;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-text {
+            font-weight: 1000;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        /* 👇 MOBILE SPECIFIC FIXES (Sirf mobile me apply hoga) 👇 */
+        @media (max-width: 768px) {
+            .navbar-transparent {
+                position: relative !important; /* Ab header apni jagah lega, overlap nahi karega */
+                flex-direction: column; /* Logo upar, Button neeche */
+                gap: 1px;
+                padding: 10px 15px !important;
+               
+            }
+            
+            .logo-text {
+                color: #0d6efd !important; /* Mobile me text Blue kar diya taaki white bg pe dikhe */
+                font-size: 1.5rem;
+            }
+
+            .glass-container {
+                margin-top: 0 !important; /* Header ke baad apne aap aayega */
+                padding-top: 20px;
+            }
+
+            .main-card {
+                padding: 1.5rem 1rem; /* Mobile me padding thodi kam */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+
+        <div class="navbar-transparent d-flex justify-content-between align-items-center">
+
+            <div class="d-flex align-items-center gap-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" height="70" alt="Logo">
+                <span class="h2 mb-0 logo-text text-primary">Mundrawati Niketan</span>
+            </div>
+
+            <div>
+                <a href="{{ url_for('main_login') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                    Login Portal
+                </a>
+            </div>
+        </div>
+
+        <div class="glass-container">
+            <div class="main-card">
+
+                <div class="mb-4">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" style="height: 120px; width: auto;" alt="Mundrawati Logo">
+                </div>
+
+                <h1 class="fw-bold text-dark mb-3">Welcome to Mundrawati Niketan</h1>
+                <p class="lead text-muted mb-5 px-md-5">
+                    A fully digital ecosystem where Rent Agreements, Monthly Receipts, and Electricity Bills are sent directly to your email.
+                </p>
+
+                <div class="row g-4 text-start">
+                    <div class="col-md-4">
+                        <div class="feature-box">
+                            <div class="icon-circle text-primary"><i class="fas fa-file-invoice-dollar"></i></div>
+                            <h5 class="fw-bold text-dark">Auto Receipts & Agreements</h5>
+                            <p class="small text-muted mb-0">
+                                Get your <strong>Rent Agreement PDF</strong> instantly upon joining and <strong>Monthly Receipts</strong> directly via email upon payment.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-box">
+                            <div class="icon-circle text-warning"><i class="fas fa-bolt"></i></div>
+                            <h5 class="fw-bold text-dark">Smart Utility Billing</h5>
+                            <p class="small text-muted mb-0">
+                                Transparent <strong>Electricity Calculation</strong> based on meter readings. Track your usage and pay online via <strong>UPI QR</strong>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-box">
+                            <div class="icon-circle text-success"><i class="fas fa-bell"></i></div>
+                            <h5 class="fw-bold text-dark">Digital Notices & Support</h5>
+                            <p class="small text-muted mb-0">
+                                Stay updated with the digital Notice Board and raise maintenance <strong>Complaints</strong> directly from your dashboard.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="professional-footer">
+        <div class="container">
+            <div class="row g-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" height="40" class="rounded bg-white p-1">
+                        <h5 class="text-white mb-0 fw-bold">MUNDRAWATI NIKETAN</h5>
+                    </div>
+                    <p class="small text-secondary mb-4" style="line-height: 1.6;">
+                        Redefining rental living in Muzaffarpur since 2015. We provide a safe, secure, and technologically advanced environment for students and professionals.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="https://www.facebook.com/vivek.mishra.13309" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/vivekmishra_45?igsh=MTk5NnRiamVybnJiMw==" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 offset-lg-1">
+                    <h5 class="footer-heading">Quick Links</h5>
+                    <a href="{{ url_for('main_login') }}" class="footer-link">Owner Login</a>
+                    <a href="{{ url_for('main_login') }}" class="footer-link">Renter Login</a>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                </div>
+
+                <div class="col-lg-4 col-md-6 offset-lg-1">
+                    <h5 class="footer-heading">Get In Touch</h5>
+                    <div class="d-flex mb-3 align-items-center">
+                        <i class="fas fa-user-tie me-3 text-primary"></i>
+                        <span class="small fw-semibold">Owner: Vivek Kumar Mishra</span>
+                    </div>
+
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-map-marker-alt mt-1 me-3 text-primary"></i>
+                        <span class="small">Sahjanand Colony 07, Muzaffarpur,<br>Bihar - 842001, India</span>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-envelope mt-1 me-3 text-primary"></i>
+                        <span class="small">vivekkumarmishra50@gmail.com</span>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-phone-alt mt-1 me-3 text-primary"></i>
+                        <span class="small">+91 9471271839</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="copyright-bar">
+                &copy; {{ date.today().year }} Mundrawati Niketan. All rights reserved. | Designed by @Adarsh Pandey
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

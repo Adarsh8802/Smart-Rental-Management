@@ -1,0 +1,23 @@
+{% extends "auth_layout.html" %}
+{% block body_content %}
+<div class="auth-container">
+    <div class="auth-box text-start">
+        <h2 class="fw-bold mb-3 text-center">Renter Login</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for category, message in messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}{% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-4">
+                <label class="form-label">Enter OTP</label>
+                <input type="text" name="otp" class="form-control" placeholder="Enter 4-digit OTP" required>
+            </div>
+            <div class="d-grid gap-3">
+                <button type="submit" class="btn btn-primary">✔ Verify OTP</button>
+                <a href="{{ url_for('renter_login') }}" class="btn btn-link text-decoration-none">🔄 Resend OTP</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

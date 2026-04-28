@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - Mundrawati Niketan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 1. GLOBAL & LAPTOP STYLES (Default) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            overflow-x: hidden;
+        }
+
+        /* Flexbox Layout for Desktop */
+        .dashboard-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling (Laptop) */
+        .sidebar {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 10px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            width: 100%;
+            background-color: #f8f9fa;
+        }
+
+        /* Menu Links Styling */
+        .nav-link {
+            color: #555;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background-color: #f0f2f5;
+            color: #0d6efd;
+        }
+        .nav-link.active {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        .nav-link i {
+            width: 25px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        /* 2. MOBILE RESPONSIVE STYLES (Phone View) */
+        .mobile-header, .sidebar-overlay { display: none; } /* Default Hidden */
+
+        @media (max-width: 768px) {
+            .dashboard-wrapper {
+                display: block; /* Flex hata diya */
+            }
+
+            /* Header dikhana */
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 15px;
+                background: white;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                height: 60px; /* Fixed height for header */
+            }
+
+            /* Sidebar ko chupana (Off-canvas) */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease-in-out;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            }
+            .sidebar.active {
+                left: 0;
+            }
+
+            /* Overlay */
+            .sidebar-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+            .sidebar-overlay.active { display: block; }
+
+            .main-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <button class="btn btn-light border" id="sidebarToggle">
+            <i class="fas fa-bars fa-lg"></i>
+        </button>
+
+        <span class="fw-bold text-primary h5 mb-0">Mundrawati Niketan</span>
+
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" 
+             alt="Logo" 
+             style="height: 40px; width: auto; object-fit: contain;">
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dashboard-wrapper">
+        <nav class="sidebar" id="sidebarMenu">
+            
+            <div class="mb-4 text-center">
+                <a href="{{ url_for('owner_dashboard') if session.get('user_type') == 'owner' else url_for('renter_dashboard') }}" class="text-decoration-none">
+                     <img src="{{ url_for('static', filename='images/logo1.png') }}" height="90" alt="Logo" class="mb-2">
+                </a>
+                
+                <div class="bg-light p-2 rounded border mt-2 d-flex align-items-center gap-2 text-start">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div style="line-height: 1.2;">
+                        <small class="text-muted d-block" style="font-size: 11px;">Logged in as</small>
+                        {% if session.get('user_type') == 'owner' %}
+                            <span class="fw-bold text-dark small">{{ current_user.username }}</span>
+                        {% else %}
+                            <span class="fw-bold text-dark small">{{ current_user.name.split()[0] }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav flex-column">
+                {% if session.get('user_type') == 'owner' %}
+                    <a href="{{ url_for('owner_dashboard') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('add_renter') }}" class="nav-link {% if active_page == 'add_renter' %}active{% endif %}">
+                        <i class="fas fa-user-plus"></i> Add Renter
+                    </a>
+                    <a href="{{ url_for('view_renters') }}" class="nav-link {% if active_page == 'view_renters' %}active{% endif %}">
+                        <i class="fas fa-users"></i> View Renters
+                    </a>
+                    <a href="{{ url_for('payment_entry') }}" class="nav-link {% if active_page == 'payment_entry' %}active{% endif %}">
+                        <i class="fas fa-rupee-sign"></i> Payment Entry
+                    </a>
+                    <a href="{{ url_for('transaction_history') }}" class="nav-link {% if active_page == 'transactions' %}active{% endif %}">
+                        <i class="fas fa-history"></i> History & Reports
+                    </a>
+                    <a href="{{ url_for('reminder_status') }}" class="nav-link {% if active_page == 'reminder_status' %}active{% endif %}">
+                        <i class="fas fa-bell"></i> Reminders
+                    </a>
+                    <a href="{{ url_for('owner_complaints') }}" class="nav-link {% if active_page == 'complaints' %}active{% endif %}">
+                        <i class="fas fa-tools"></i> Complaints
+                    </a>
+                    <a href="{{ url_for('history') }}" class="nav-link {% if active_page == 'history' %}active{% endif %}">
+                        <i class="fas fa-archive"></i> Old Records
+                    </a>
+                    <hr class="my-3">
+                    <a href="{{ url_for('change_password') }}" class="nav-link {% if active_page == 'change_password' %}active{% endif %}">
+                        <i class="fas fa-lock"></i> Password
+                    </a>
+                    <a href="{{ url_for('owner_logout') }}" class="nav-link text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('renter_dashboard') }}" class="nav-link active">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('renter_pay_online') }}" class="nav-link {% if active_page == 'pay_online' %}active{% endif %}">
+                        <i class="fas fa-qrcode"></i> Pay Rent
+                    </a>
+                    <a href="{{ url_for('renter_history') }}" class="nav-link {% if active_page == 'history' %}active{% endif %}">
+                        <i class="fas fa-file-invoice"></i> Receipts
+                    </a>
+                    <a href="{{ url_for('raise_complaint') }}" class="nav-link">
+                        <i class="fas fa-tools"></i> Complaints
+                    </a>
+                    <a href="{{ url_for('renter_logout') }}" class="nav-link text-danger mt-4">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-4 shadow-sm" role="alert">
+                            {% if category == 'success' %} <i class="fas fa-check-circle me-2"></i> {% endif %}
+                            {% if category == 'danger' %} <i class="fas fa-exclamation-circle me-2"></i> {% endif %}
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebarMenu');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+
+            if(toggleBtn) toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            if(overlay) overlay.addEventListener('click', toggleMenu);
+        });
+    </script>
+</body>
+</html>

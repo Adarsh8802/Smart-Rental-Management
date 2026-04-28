@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Helvetica', sans-serif; padding: 20px; border: 5px solid #eee; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #16a34a; }
+        .sub-text { color: #666; font-size: 12px; }
+        .receipt-title { background: #16a34a; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 18px; margin: 20px 0; }
+        
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .label { font-weight: bold; color: #555; }
+        .value { font-weight: bold; color: #000; text-align: right; }
+        
+        .total-box { background: #f0fdf4; padding: 15px; border: 1px dashed #16a34a; text-align: center; margin-top: 20px; }
+        .amount { font-size: 30px; font-weight: bold; color: #16a34a; }
+        
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">Mundrawati Niketan</div>
+        <div class="sub-text">Payment Receipt | Auto-Generated</div>
+        <div>Date: {{ date.today().strftime('%d %B, %Y') }}</div>
+    </div>
+
+    <div class="receipt-title">PAYMENT ACKNOWLEDGEMENT</div>
+
+    <table class="info-table">
+        <tr>
+            <td class="label">Receipt No:</td>
+            <td class="value">#INV-{{ payment.id }}{{ range(100, 999) | random }}</td>
+        </tr>
+        <tr>
+            <td class="label">Received From:</td>
+            <td class="value">{{ renter.name }} (Room {{ renter.room_no }})</td>
+        </tr>
+        <tr>
+            <td class="label">Payment For Month:</td>
+            <td class="value">{{ payment.month_year }}</td>
+        </tr>
+        <tr>
+            <td class="label">Payment Mode:</td>
+            <td class="value">{{ payment.mode }} {% if payment.transaction_id %}({{ payment.transaction_id }}){% endif %}</td>
+        </tr>
+        <tr>
+            <td class="label">Payment Date:</td>
+            <td class="value">{{ payment.payment_date.strftime('%d %b, %Y') }}</td>
+        </tr>
+    </table>
+
+    {% if payment.elec_amount > 0 %}
+    <div style="margin: 10px 0; font-size: 12px; text-align: center; color: #666;">
+        Breakdown: Rent (₹{{ payment.amount - payment.elec_amount }}) + Elec Bill (₹{{ payment.elec_amount }})
+    </div>
+    {% endif %}
+
+    <div class="total-box">
+        <div>Total Amount Paid</div>
+        <div class="amount">₹{{ payment.amount }}</div>
+        <div style="font-size: 12px; margin-top: 5px; color: #166534;">
+            <img src="https://img.icons8.com/color/48/000000/verified-badge.png" width="15" style="vertical-align: middle;">
+            Payment Successfully Verified
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This is a computer-generated receipt and does not require a physical signature.</p>
+        <p>Mundrawati Niketan, Muzaffarpur, Bihar</p>
+    </div>
+</body>
+</html>
